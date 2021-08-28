@@ -1,0 +1,4 @@
+artifacts
+config/.autorestic.lock.yml
+backup
+cache

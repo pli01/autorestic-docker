@@ -1,0 +1,27 @@
+version: '3.5'
+
+networks:
+  backup-network:
+    driver: bridge
+    driver_opts:
+      com.docker.network.driver.mtu: 1450
+
+services:
+  backup:
+    image: autorestic:${AUTORESTIC_VERSION:-latest}
+    networks:
+      - backup-network
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ${RESTIC_CACHE_DIR:-./cache}:/autorestic/cache
+      - ${AUTORESTIC_CONFIG_DIR:-./config}:/autorestic/config
+      - ${AUTORESTIC_LOCATIONS_DIR:-./data}:/autorestic/locations
+      - ${AUTORESTIC_BACKENDS_DIR:-./backup}:/autorestic/backends
+    environment:
+      - http_proxy=${http_proxy}
+      - https_proxy=${https_proxy}
+      - no_proxy=${no_proxy}
+      - RESTIC_CACHE_DIR=/autorestic/cache
+    env_file:
+      - openstack-variables.env
+

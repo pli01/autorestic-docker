@@ -1,0 +1,10 @@
+backends:
+  my-local:
+    type: local
+    path: /autorestic/backends/my-local
+    key: 07sjgLAmFw0A1teVdAMEdXl2Rmn5jgYnqGLnuQAFY0UsoMUOzJfNaJW5PhT61CBIZh4QeZNO7RbYYJvnlg
+locations:
+  my-location:
+    from: /autorestic/locations/my-location
+    to:
+    - my-local
