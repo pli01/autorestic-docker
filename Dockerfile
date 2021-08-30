@@ -3,6 +3,8 @@ FROM debian:buster
 ARG MIRROR_DEBIAN
 ARG MIRROR_DOCKER
 ARG MIRROR_DOCKER_KEY
+ARG AUTORESTIC_PACKAGE_VERSION=${AUTORESTIC_PACKAGE_VERSION}
+ARG RCLONE_PACKAGE_VERSION=${RCLONE_PACKAGE_VERSION}
 
 RUN useradd autorestic -G sudo \
     && mkdir -p /home/autorestic \
@@ -35,8 +37,24 @@ RUN echo "$http_proxy $no_proxy" && set -x && [ -z "$MIRROR_DEBIAN" ] || \
 #
 # Download and extract autorestic
 RUN cd /home/autorestic \
-    && echo "+ Downloading autorestic" \
-    && curl -s https://raw.githubusercontent.com/CupCakeArmy/autorestic/master/install.sh | bash
+    && tags=${AUTORESTIC_PACKAGE_VERSION:+tags/} \
+    && version=${AUTORESTIC_PACKAGE_VERSION:-latest} \
+    && autorestic_url=$(curl -sL https://api.github.com/repos/cupcakearmy/autorestic/releases/${tags}${version} | jq -re '.assets[].browser_download_url' |grep 'linux_amd64.bz2') ; \
+    echo "+ Downloading $autorestic_url" \
+    && curl -fsSL $autorestic_url | bzip2 -fdc > /usr/local/bin/autorestic ; \
+    chmod +x /usr/local/bin/autorestic ; \
+    autorestic install \
+    && autorestic --version  && restic version
+
+# Download and extract rclone
+RUN cd /home/autorestic \
+    && tags=${RCLONE_PACKAGE_VERSION:+tags/} \
+    && version=${RCLONE_PACKAGE_VERSION:-latest} \
+    && rclone_url=$(curl -sL  https://api.github.com/repos/rclone/rclone/releases/${tags}${version} | jq -re '.assets[].browser_download_url' |grep 'linux-amd64.deb') ; \
+    echo "+ Downloading $rclone_url" \
+    && ( curl -fsSL $rclone_url > rclone.deb ) \
+    && dpkg -i rclone.deb && rm -rf tmp rclone.deb \
+    && rclone version
 
 # Entry point
 WORKDIR /home/autorestic

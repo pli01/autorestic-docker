@@ -36,4 +36,5 @@ DOCKER_REPOSITORY := pli01/autorestic-docker
 #
 # autorestic
 #
-AUTORESTIC_VERSION ?= v1.2.0
+AUTORESTIC_PACKAGE_VERSION ?= # v1.2.0
+RCLONE_PACKAGE_VERSION ?= # v1.2.0
